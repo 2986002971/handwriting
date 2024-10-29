@@ -10,16 +10,17 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "security": {
+      "csp": null
+    },
     "windows": [
       {
         "title": "handwriting",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "label": "main"
       }
-    ],
-    "security": {
-      "csp": null
-    }
+    ]
   },
   "bundle": {
     "active": true,
@@ -30,6 +31,9 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
+    ],
+    "resources": [
+      "src/fonts/*"
     ]
   }
 }

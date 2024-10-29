@@ -4,7 +4,7 @@ import TextProcessor from './components/TextProcessor.vue'
 
 <template>
   <div class="container">
-    <h1>文本格式处理工具</h1>
+    <h1>文本手写化转换工具</h1>
     <TextProcessor />
   </div>
 </template>

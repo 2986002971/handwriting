@@ -4,12 +4,44 @@
 )]
 
 mod text_processor;
-use crate::text_processor::process_text;
+
+use std::io::Cursor;
+
+#[tauri::command]
+async fn capture_screenshot(x: i32, y: i32, width: u32, height: u32) -> Result<Vec<u8>, String> {
+    use screenshots::Screen;
+    
+    println!("截图区域: x={}, y={}, width={}, height={}", x, y, width, height);
+    
+    let screens = Screen::all().map_err(|e| e.to_string())?;
+    let screen = screens.first().ok_or("No screen found")?;
+    
+    println!("屏幕信息: {:?}", screen.display_info);
+    
+    let image = screen.capture_area(x, y, width, height)
+        .map_err(|e| e.to_string())?;
+    
+    // 创建一个内存缓冲区来存储 PNG 数据
+    let mut buffer = Vec::new();
+    let mut cursor = Cursor::new(&mut buffer);
+    image.write_to(&mut cursor, screenshots::image::ImageFormat::Png)
+        .map_err(|e| e.to_string())?;
+    
+    println!("截图完成，大小: {} bytes", buffer.len());
+    
+    Ok(buffer)
+}
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_clipboard_manager::init())
-        .invoke_handler(tauri::generate_handler![process_text])
+        .invoke_handler(tauri::generate_handler![
+            text_processor::process_text,
+            text_processor::get_embedded_fonts,
+            capture_screenshot
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -10,7 +10,10 @@ const app = createApp(App)
 // 配置 PrimeVue
 app.use(PrimeVue, {
     theme: {
-        preset: Aura
+        preset: Aura,
+        options: {
+            darkModeSelector: false, // 或者使用 'none'
+        }
     }
 })
 
