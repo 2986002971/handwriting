@@ -11,12 +11,8 @@ use std::io::Cursor;
 async fn capture_screenshot(x: i32, y: i32, width: u32, height: u32) -> Result<Vec<u8>, String> {
     use screenshots::Screen;
     
-    println!("截图区域: x={}, y={}, width={}, height={}", x, y, width, height);
-    
     let screens = Screen::all().map_err(|e| e.to_string())?;
     let screen = screens.first().ok_or("No screen found")?;
-    
-    println!("屏幕信息: {:?}", screen.display_info);
     
     let image = screen.capture_area(x, y, width, height)
         .map_err(|e| e.to_string())?;
@@ -26,8 +22,6 @@ async fn capture_screenshot(x: i32, y: i32, width: u32, height: u32) -> Result<V
     let mut cursor = Cursor::new(&mut buffer);
     image.write_to(&mut cursor, screenshots::image::ImageFormat::Png)
         .map_err(|e| e.to_string())?;
-    
-    println!("截图完成，大小: {} bytes", buffer.len());
     
     Ok(buffer)
 }

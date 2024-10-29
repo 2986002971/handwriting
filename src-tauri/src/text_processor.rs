@@ -10,8 +10,12 @@ pub struct TextSettings {
     font_sizes: Vec<f32>,
     font_names: Vec<String>,
     line_spacing: i32,
-    position_offset: f32,
+    line_spacing_random: f32,
     spacing_offset: f32,
+    spacing_offset_random: f32,
+    italic_probability: i32,
+    bold_probability: i32,
+    indent_size: f32,
 }
 
 #[derive(Serialize)]
@@ -24,38 +28,39 @@ pub struct FontData {
 pub fn process_text(text: &str, settings: TextSettings) -> String {
     let mut rng = rand::thread_rng();
 
-    // 处理段落
     let paragraphs: Vec<&str> = text.split('\n').collect();
     let formatted_paragraphs: Vec<String> = paragraphs
         .iter()
         .map(|p| {
-            // 处理每个字符
             let chars: String = p.chars()
                 .map(|c| {
                     let font_name = select_font_for_char(&c, &settings.font_names, &mut rng);
                     let font_size = settings.font_sizes[rng.gen_range(0..settings.font_sizes.len())];
-                    let is_italic = rng.gen_ratio(1, 13);
-                    let is_bold = rng.gen_ratio(1, 27);
-                    let position_offset = rng.gen_range(-1.0..1.0) + settings.position_offset;
-                    let spacing_offset = rng.gen_range(-1.0..1.0) + settings.spacing_offset;
-
+                    let is_italic = rng.gen_ratio(1, settings.italic_probability as u32);
+                    let is_bold = rng.gen_ratio(1, settings.bold_probability as u32);
+                    
+                    let random_spacing = rng.gen_range(-settings.spacing_offset_random..=settings.spacing_offset_random);
+                    let final_spacing = settings.spacing_offset + random_spacing;
+                    
                     format!(
-                        r#"<span style="display:inline-block;font-family:'{}';font-size:{}px;font-style:{};font-weight:{};position:relative;top:{}px;letter-spacing:{}px">{}</span>"#,
+                        r#"<span style="font-family:'{}';font-size:{}px;font-style:{};font-weight:{};letter-spacing:{}px">{}</span>"#,
                         font_name,
                         font_size,
                         if is_italic { "italic" } else { "normal" },
                         if is_bold { "bold" } else { "normal" },
-                        position_offset,
-                        spacing_offset,
+                        final_spacing,
                         c
                     )
                 })
                 .collect();
 
-            let line_height = rng.gen_range(0..5) as f32 + settings.line_spacing as f32;
+            let random_line_spacing = rng.gen_range(-settings.line_spacing_random..=settings.line_spacing_random);
+            let final_line_spacing = (settings.line_spacing as f32 + random_line_spacing).max(0.0);
+            
             format!(
-                r#"<p style="line-height:{}px;text-indent:2em;margin:0;padding:0">{}</p>"#,
-                line_height,
+                r#"<p style="line-height:{}px;text-indent:{}em;margin:0;padding:0">{}</p>"#,
+                final_line_spacing,
+                settings.indent_size,
                 chars
             )
         })

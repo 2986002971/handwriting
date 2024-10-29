@@ -1,7 +1,8 @@
 import { createApp } from 'vue'
 import PrimeVue from 'primevue/config'
-// 使用 Aura 主题
 import Aura from '@primevue/themes/aura'
+import Slider from 'primevue/slider'
+import InputNumber from 'primevue/inputnumber'
 
 import App from './App.vue'
 
@@ -16,5 +17,7 @@ app.use(PrimeVue, {
         }
     }
 })
+app.component('Slider', Slider)
+app.component('InputNumber', InputNumber)
 
 app.mount('#app')
